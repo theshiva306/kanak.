@@ -1,15 +1,37 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+
 
 export default function Page() {
   const [noCount, setNoCount] = useState(0);
   const [yesPressed, setYesPressed] = useState(false);
   const yesButtonSize = Math.min(noCount * 12 + 20, 220);
+
+  // ---- MUSIC CONTROL START ----
+  const [musicOn, setMusicOn] = useState(true);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  const toggleMusic = () => {
+    if (musicOn) {
+      audioRef.current?.pause();
+    } else {
+      audioRef.current?.play();
+    }
+    setMusicOn(!musicOn);
+  };
+  // ---- MUSIC CONTROL END ----
+
+  // ---- SET INITIAL VOLUME ----
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = 0.2; // soft volume
+    }
+  }, [])
       
 
-  const handleNoClick = () => {
+  function handleNoClick() {
     setNoCount(noCount + 1);
-  };
+  }
 
   const getNoButtonText = () => {
     const phrases = [
@@ -34,7 +56,7 @@ export default function Page() {
     return phrases[Math.min(noCount, phrases.length - 1)];
   };
 
-  return (
+  return  (
   <div className="flex min-h-screen flex-col items-center justify-center text-center px-4 bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100">
     {yesPressed ? (
       <>
@@ -72,6 +94,35 @@ export default function Page() {
         </div>
       </>
     )}
+
+    {/* -------- MUSIC BUTTON START (Top-Right) -------- */}
+<div
+  className="fixed top-4 right-4 flex items-center cursor-pointer select-none z-50"
+  onClick={toggleMusic}
+>
+  {/* Cylinder Background */}
+  <div className="relative w-16 h-6 bg-gray-300 rounded-full">
+    {/* Sliding Green Ball */}
+    <div
+      className={`absolute top-0.5 w-5 h-5 bg-green-500 rounded-full transition-all duration-300 ${
+        musicOn ? "left-0.5" : "right-0.5"
+      }`}
+    ></div>
+  </div>
+  {/* On/Off Text */}
+  <span className="ml-2 text-sm font-thin">{musicOn ? "On" : "Off"}</span>
+</div>
+{/* -------- MUSIC BUTTON END -------- */}
+
+    {/* AUDIO ELEMENT */}
+    <audio
+      ref={audioRef}
+      src="/song.mp3" // Ensure this path is correct relative to your public directory
+      
+      autoPlay
+      loop
+      
+    />
   </div>
 );
 }
